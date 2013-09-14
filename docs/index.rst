@@ -1,6 +1,11 @@
-===========
- Globalist
-===========
+.. Globalist documentation master file, created by
+   sphinx-quickstart on Sat Sep 14 10:11:58 2013.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+=======================================
+ Welcome to Globalist's documentation!
+=======================================
 
 Globalist is a horrible idea to make a fast place for global storage.
 
@@ -29,27 +34,19 @@ order to scale up an application. With all that in mind, globalist is
 an attempt to provide a reasonable solution to a distributed data
 store that does caching well.
 
+Contents:
 
-RESTful HTTP API
-================
+.. toctree::
+   :maxdepth: 2
 
-Globalist has a web API that makes an effort to map as closely to the
-MongoDB API as possible. There are some use cases such as GridFS and
-tailable cursors that are not implemented.
-
-Globalist doesn't try to support more being is that if
-you need to use extremely large chunks of data, then you are unlikely
-to be able to cache that data anyway. For example, if I had a
-collection full of 2 GB documents, I would need 2 GB to cache each
-document. In this case, Globalist is not a viable option.
+   concepts
+   gettingstarted
 
 
 
-MongoDB, Redis and HTTP
-=======================
+Indices and tables
+==================
 
-Data is stored in MongoDB, data is cached in Redis and the API is
-implemented over HTTP.
-
-It is assumed that the user will configure and set up the necessary
-databases.
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

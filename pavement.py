@@ -3,10 +3,12 @@ from paver.easy import *
 
 options(
     venv=Bunch(dir='.'),
-    test_reqs=[
+    dev_reqs=[
         'pytest',
         'mock',
-    ]
+        'sphinx',
+    ],
+
 )
 
 # local_options.py support
@@ -30,7 +32,7 @@ def virtualenv():
 @needs(['virtualenv'])
 def bootstrap():
     env_do('python setup.py develop')
-    for req in options.test_reqs:
+    for req in options.dev_reqs:
         env_do('pip install %s' % req)
 
 
@@ -40,3 +42,8 @@ def start():
         env_do('python globalist/server.py')
     except KeyboardInterrupt:
         pass
+
+
+@task
+def build_docs():
+    sh('make html', cwd=path('docs'))

@@ -1,4 +1,3 @@
-import os
 import setuptools
 
 
@@ -11,9 +10,16 @@ setup_params = dict(
     author_email='eric@ionrock.org',
     packages=setuptools.find_packages(),
     include_package_data=True,
+    entry_points={
+        'console_scripts': [
+            'globalist = globalist.server:run',
+        ]
+    },
     install_requires=[
         'flask',
         'pyyaml',
+        'requests',
+        'cachecontrol',
         'pymongo>=2.6.2',
         'mgoquery>=0.5.4',
     ],

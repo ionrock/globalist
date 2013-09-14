@@ -1,4 +1,5 @@
 import json
+import hashlib
 import bson
 import bson.json_util
 
@@ -14,8 +15,12 @@ db = get_conn()
 app = Flask(__name__)
 
 
+def to_bson(obj):
+    return json.dumps(obj, default=bson.json_util.default)
+
+
 def bsonify(obj):
-    resp = make_response(json.dumps(obj, default=bson.json_util.default))
+    resp = make_response(to_bson(obj))
     resp.headers['Content-Type'] = 'application/json'
     return resp
 
@@ -27,12 +32,15 @@ def abs_url_for(*args, **kw):
 
 @app.url_value_preprocessor
 def find_mongo_object(endpoint, values):
+    print('VALUES: %s' % values)
+    print('ENDPOINT: %s' % endpoint)
     g.database = None
-    if 'database' in values:
-        g.database = db[values['database']]
+    if values:
+        if 'database' in values:
+            g.database = db[values['database']]
 
-    if 'collection' in values and g.database:
-        g.collection = g.database[values['collection']]
+        if 'collection' in values and g.database:
+            g.collection = g.database[values['collection']]
 
 
 @app.route('/')
@@ -78,27 +86,35 @@ def find(database, collection):
     return bsonify({'result': result})
 
 
-@app.route('/<database>/<collection>/save/')
+@app.route('/<database>/<collection>/save/', methods=['POST'])
 def save(database, collection):
     if request.json:
         id = g.collection.save(request.json)
-        return redirect(url_for('findone', q=id, **request.view_args))
+        return redirect(url_for('find_one', q=id, **request.view_args))
 
     id = '51b8c8f77a58ec382663682d'
     return redirect(url_for('findone', q=id, **request.view_args))
 
 
-@app.route('/<database>/<collection>/findone/<q>')
-def findone(database, collection, q):
+@app.route('/<database>/<collection>/find_one/<q>/')
+def find_one(database, collection, q):
     try:
         query = mgoparser.parse(q)
     except ParseException:
         query = {'_id': bson.ObjectId(q)}
 
-    return bsonify(g.collection.find_one(query))
+    doc = g.collection.find_one(query)
+    etag = hashlib.md5(to_bson(doc))
+    resp = bsonify(doc)
+    resp.headers['Cache-Control'] = 'max-age=3600'
+    resp.headers['ETag'] = etag
+    return resp
 
 
-if __name__ == '__main__':
+def run():
     app.debug = True
     app.config.update(config)
     app.run()
+
+if __name__ == '__main__':
+    run()
